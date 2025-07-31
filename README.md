@@ -35,7 +35,7 @@ Um jogo de Tetris com visual retrô e inspiração em cores do universo Pokémon
 * `index.html`: Estrutura da interface
 * `styles.css`: Estilização visual retrô
 * `tetris.js`: Lógica do jogo e renderização
-* `assets/icon/din_tetris_favicon.ico`: Favicon 8-bit personalizado
+* `assets/din_tetris_favicon.ico`: Favicon 8-bit personalizado
 
 ---
 
