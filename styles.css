@@ -55,6 +55,11 @@ p {
     align-items: center;
     gap: 0.5rem;
     cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.control-group label:hover {
+    color: #fff;
 }
 
 label {
@@ -71,11 +76,18 @@ select {
     font-size: 0.9rem;
     cursor: pointer;
     transition: all 0.3s ease;
+    outline: none;
 }
 
 select:hover {
     background: rgba(255, 255, 255, 0.15);
     border-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
+}
+
+select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 15px rgba(102, 126, 234, 0.5);
 }
 
 button {

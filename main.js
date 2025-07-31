@@ -54,26 +54,48 @@ const colorSchemes = {
             [1, [255, 180, 255]]
         ]
     },
-    fractalFlame: {
+    electric: {
         colors: [
-            [0, [0, 0, 0]],
-            [0.1, [30, 0, 50]],
-            [0.3, [100, 20, 100]],
-            [0.5, [200, 50, 80]],
-            [0.7, [255, 100, 50]],
-            [0.9, [255, 200, 100]],
+            [0, [0, 0, 50]],
+            [0.15, [0, 255, 255]],
+            [0.3, [0, 100, 255]],
+            [0.5, [255, 0, 255]],
+            [0.7, [255, 255, 0]],
+            [0.85, [255, 100, 0]],
             [1, [255, 255, 255]]
         ]
     },
-    organic: {
+    fire: {
         colors: [
-            [0, [0, 20, 0]],
-            [0.2, [20, 60, 20]],
-            [0.4, [60, 120, 40]],
-            [0.6, [120, 180, 80]],
-            [0.8, [180, 220, 120]],
-            [0.9, [220, 255, 160]],
-            [1, [255, 255, 200]]
+            [0, [0, 0, 0]],
+            [0.1, [255, 0, 0]],
+            [0.3, [255, 100, 0]],
+            [0.5, [255, 200, 0]],
+            [0.7, [255, 255, 100]],
+            [0.9, [255, 255, 255]],
+            [1, [255, 255, 255]]
+        ]
+    },
+    toxic: {
+        colors: [
+            [0, [0, 0, 0]],
+            [0.2, [0, 255, 0]],
+            [0.4, [100, 255, 0]],
+            [0.6, [255, 255, 0]],
+            [0.8, [255, 100, 0]],
+            [0.9, [255, 0, 255]],
+            [1, [255, 255, 255]]
+        ]
+    },
+    prism: {
+        colors: [
+            [0, [0, 0, 0]],
+            [0.16, [255, 0, 128]],
+            [0.33, [128, 0, 255]],
+            [0.5, [0, 128, 255]],
+            [0.66, [0, 255, 128]],
+            [0.83, [255, 128, 0]],
+            [1, [255, 255, 255]]
         ]
     }
 };
@@ -91,7 +113,13 @@ function resizeCanvas() {
 function getColor(iterations, maxIterations, scheme) {
     if (iterations === maxIterations) return [0, 0, 0];
     
-    const t = Math.pow(iterations / maxIterations, 0.8);
+    // Add more dynamic variation based on random seed
+    const time = Date.now() * 0.001;
+    const seed = Math.sin(time + iterations) * 0.5 + 0.5;
+    
+    // Enhanced color interpolation with more vivid results
+    const baseT = Math.pow(iterations / maxIterations, 0.6 + Math.sin(time) * 0.2);
+    const t = Math.max(0, Math.min(1, baseT + seed * 0.1 - 0.05));
     
     // Ensure scheme exists, fallback to 'neon' if not
     const selectedScheme = colorSchemes[scheme] || colorSchemes['neon'];
@@ -110,9 +138,30 @@ function getColor(iterations, maxIterations, scheme) {
         }
     }
     
-    const r = Math.floor(color1[0] + (color2[0] - color1[0]) * t2);
-    const g = Math.floor(color1[1] + (color2[1] - color1[1]) * t2);
-    const b = Math.floor(color1[2] + (color2[2] - color1[2]) * t2);
+    // Enhanced color mixing with saturation boost
+    const mix = (c1, c2, factor) => {
+        const val = c1 + (c2 - c1) * factor;
+        return Math.floor(Math.pow(val / 255, 0.8) * 255);
+    };
+    
+    let r = mix(color1[0], color2[0], t2);
+    let g = mix(color1[1], color2[1], t2);
+    let b = mix(color1[2], color2[2], t2);
+    
+    // Boost saturation and brightness
+    const maxColor = Math.max(r, g, b);
+    if (maxColor > 0) {
+        const boost = 1.2 + Math.sin(time * 2) * 0.3;
+        r = Math.min(255, Math.floor(r * boost));
+        g = Math.min(255, Math.floor(g * boost));
+        b = Math.min(255, Math.floor(b * boost));
+    }
+    
+    // Add slight hue variation
+    const hueShift = Math.sin(time + iterations * 0.01) * 10;
+    r = Math.max(0, Math.min(255, r + hueShift));
+    g = Math.max(0, Math.min(255, g + hueShift * 0.7));
+    b = Math.max(0, Math.min(255, b + hueShift * 0.3));
     
     return [r, g, b];
 }
@@ -196,7 +245,7 @@ function phoenix(z, c, maxIterations) {
     return n;
 }
 
-function lyapunov(c, maxIterations) {
+function lyapunovFractal(c, maxIterations) {
     let sum = 0;
     let x = 0.5;
     
@@ -212,75 +261,62 @@ function lyapunov(c, maxIterations) {
     return Math.abs(sum / maxIterations) * 100;
 }
 
-function magneticPendulum(z, c, maxIterations) {
-    const magnets = [
-        { x: 1, y: 0 },
-        { x: -0.5, y: 0.866 },
-        { x: -0.5, y: -0.866 }
-    ];
-    
-    let x = z.re;
-    let y = z.im;
+function newtonFractal(z, c, maxIterations) {
     let n = 0;
+    let zTemp = { re: z.re, im: z.im };
     
     while (n < maxIterations) {
-        let forceX = 0;
-        let forceY = 0;
+        const zRe = zTemp.re;
+        const zIm = zTemp.im;
+        const zRe2 = zRe * zRe;
+        const zIm2 = zIm * zIm;
+        const zMag = zRe2 + zIm2;
         
-        for (const magnet of magnets) {
-            const dx = magnet.x - x;
-            const dy = magnet.y - y;
-            const dist = dx * dx + dy * dy;
-            forceX += dx / (dist * dist);
-            forceY += dy / (dist * dist);
+        if (zMag < 0.000001) break;
+        
+        const newRe = (2 * zRe2 + zIm2) / (3 * zMag);
+        const newIm = (2 * zIm * zRe) / (3 * zMag);
+        
+        zTemp.re = newRe;
+        zTemp.im = newIm;
+        
+        if (Math.abs(zTemp.re - zRe) < 0.001 && Math.abs(zTemp.im - zIm) < 0.001) {
+            break;
         }
         
-        const newX = x + forceX * 0.5;
-        const newY = y + forceY * 0.5;
-        
-        if (Math.abs(newX - x) < 0.001 && Math.abs(newY - y) < 0.001) break;
-        
-        x = newX;
-        y = newY;
         n++;
     }
     
     return n;
 }
 
-function fractalFlame(x, y, maxIterations) {
-    const transformations = [
-        (x, y) => [0.85 * x + 0.04 * y, -0.04 * x + 0.85 * y + 1.6],
-        (x, y) => [0.2 * x - 0.26 * y, 0.23 * x + 0.22 * y + 1.6],
-        (x, y) => [-0.15 * x + 0.28 * y, 0.26 * x + 0.24 * y + 0.44],
-        (x, y) => [0, 0.16 * y]
+function cellularAutomata(x, y, maxIterations) {
+    const gridSize = 12; // smaller pattern
+    const rules = [
+        [0, 1, 0, 1, 0, 1, 0, 1],
+        [1, 0, 1, 0, 1, 0, 1, 0],
+        [0, 0, 1, 1, 0, 0, 1, 1],
+        [1, 1, 0, 0, 1, 1, 0, 0]
     ];
     
-    let px = 0;
-    let py = 0;
-    let iterations = 0;
+    const ruleIndex = Math.floor(Math.abs(x + y) * 0.05) % rules.length;
+    const rule = rules[ruleIndex];
     
-    for (let i = 0; i < maxIterations; i++) {
-        const rand = Math.random();
-        let transform;
-        
-        if (rand < 0.85) transform = transformations[0];
-        else if (rand < 0.92) transform = transformations[1];
-        else if (rand < 0.99) transform = transformations[2];
-        else transform = transformations[3];
-        
-        const [newX, newY] = transform(px, py);
-        px = newX;
-        py = newY;
-        
-        const dist = Math.sqrt((x - px) ** 2 + (y - py) ** 2);
-        if (dist < 0.01) {
-            iterations = i;
-            break;
-        }
-    }
+    const pos = (Math.floor(x * 0.2) + Math.floor(y * 0.2)) % 8;
+    return rule[pos] * maxIterations;
+}
+
+function spirographFractal(x, y, maxIterations) {
+    const R = 3;
+    const r = 1;
+    const d = 2;
     
-    return iterations;
+    const theta = Math.atan2(y, x);
+    const x1 = (R - r) * Math.cos(theta) + d * Math.cos(((R - r) / r) * theta);
+    const y1 = (R - r) * Math.sin(theta) - d * Math.sin(((R - r) / r) * theta);
+    
+    const distance = Math.sqrt((x - x1) ** 2 + (y - y1) ** 2);
+    return Math.floor((1 - Math.min(1, distance / 5)) * maxIterations);
 }
 
 function landscapeFractal(x, y, maxIterations) {
@@ -371,6 +407,21 @@ function drawFractal(type, scheme) {
                         break;
                     case 'phoenix':
                         iterations = phoenix(z, juliaC, maxIterations);
+                        break;
+                    case 'magneticPendulum':
+                        iterations = magneticPendulum(z, c, maxIterations);
+                        break;
+                    case 'lyapunov':
+                        iterations = lyapunovFractal(c, maxIterations);
+                        break;
+                    case 'newton':
+                        iterations = newtonFractal(z, c, maxIterations);
+                        break;
+                    case 'cellular':
+                        iterations = cellularAutomata(x, y, maxIterations);
+                        break;
+                    case 'spirograph':
+                        iterations = spirographFractal(x, y, maxIterations);
                         break;
                     default:
                         iterations = mandelbrot(c, maxIterations);
