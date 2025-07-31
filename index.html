@@ -1,0 +1,58 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fractal Art Generator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="controls">
+            <h1>Fractal Art Generator</h1>
+            <p>Click anywhere to generate new fractal patterns</p>
+            <div class="control-group">
+                <label for="fractalType">Fractal Type:</label>
+                <select id="fractalType">
+                    <option value="mandelbrot">Mandelbrot Set</option>
+                    <option value="julia">Julia Set</option>
+                    <option value="burningShip">Burning Ship</option>
+                    <option value="multibrot">Multibrot</option>
+                    <option value="phoenix">Phoenix Fractal</option>
+                    <option value="lyapunov">Lyapunov Fractal</option>
+                    <option value="magneticPendulum">Magnetic Pendulum</option>
+                    <option value="fractalFlame">Fractal Flame</option>
+                    <option value="landscapeFractal">Landscape Fractal</option>
+                    <option value="organicFractal">Organic Fractal</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label for="colorScheme">Color Scheme:</label>
+                <select id="colorScheme">
+                    <option value="neon">Neon Dreams</option>
+                    <option value="ocean">Ocean Depth</option>
+                    <option value="sunset">Sunset Blaze</option>
+                    <option value="galaxy">Galaxy Purple</option>
+                    <option value="fractalFlame">Fractal Flame</option>
+                    <option value="organic">Organic Life</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label>
+                    <input type="checkbox" id="kaleidoscopeToggle">
+                    Kaleidoscope Mode
+                </label>
+            </div>
+            <button id="generateBtn" class="generate-btn">Generate New</button>
+            <button id="downloadBtn" class="download-btn">Download Image</button>
+        </div>
+        <div class="canvas-container">
+            <canvas id="fractalCanvas"></canvas>
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Generating fractal...</p>
+            </div>
+        </div>
+    </div>
+    <script type="module" src="main.js"></script>
+</body>
+</html>
