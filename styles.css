@@ -69,7 +69,7 @@ label {
 
 select {
     padding: 0.5rem;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(40, 40, 40, 0.9);
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 4px;
     color: white;
@@ -80,12 +80,13 @@ select {
 }
 
 select:hover {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(60, 60, 60, 0.9);
     border-color: rgba(255, 255, 255, 0.3);
     box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
 }
 
 select:focus {
+    background: rgba(50, 50, 50, 0.9);
     border-color: #667eea;
     box-shadow: 0 0 15px rgba(102, 126, 234, 0.5);
 }
