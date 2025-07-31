@@ -312,14 +312,21 @@ function drawFractal(type, scheme) {
         const data = imageData.data;
         
         const maxIterations = 200;
-        const zoom = Math.random() * 3 + 0.5;
-        const offsetX = (Math.random() - 0.5) * 3;
-        const offsetY = (Math.random() - 0.5) * 3;
         
-        const juliaC = {
-            re: Math.random() * 2 - 1,
-            im: Math.random() * 2 - 1
-        };
+        // Generate random parameters for variety within each type
+        const zoom = Math.random() * 4 + 0.3;
+        const offsetX = (Math.random() - 0.5) * 4;
+        const offsetY = (Math.random() - 0.5) * 4;
+        
+        // Additional random parameters for fractal variations
+        const power = Math.random() * 4 + 2; // For multibrot variations
+        const juliaRe = Math.random() * 2 - 1;
+        const juliaIm = Math.random() * 2 - 1;
+        const juliaC = { re: juliaRe, im: juliaIm };
+        
+        // Burning ship variations
+        const burnScale = Math.random() * 2 + 0.5;
+        const burnOffset = Math.random() * 0.5 - 0.25;
         
         for (let px = 0; px < width; px++) {
             for (let py = 0; py < height; py++) {
@@ -341,12 +348,12 @@ function drawFractal(type, scheme) {
                     x = (rotatedX) / (width / 4) / zoom + offsetX;
                     y = (rotatedY) / (height / 4) / zoom + offsetY;
                 } else {
-                    x = (px - width / 2) / (width / 4) / zoom + offsetX;
-                    y = (py - height / 2) / (height / 4) / zoom + offsetY;
+                    x = (px - width / 2) / (width / 4) / zoom;
+                    y = (py - height / 2) / (height / 4) / zoom;
                 }
                 
                 let iterations;
-                const c = { re: x, im: y };
+                const c = { re: x + offsetX, im: y + offsetY };
                 const z = { re: x, im: y };
                 
                 switch (type) {
@@ -360,33 +367,17 @@ function drawFractal(type, scheme) {
                         iterations = burningShip(c, maxIterations);
                         break;
                     case 'multibrot':
-                        iterations = multibrot(c, maxIterations);
+                        iterations = multibrot(c, maxIterations, power);
                         break;
                     case 'phoenix':
                         iterations = phoenix(z, juliaC, maxIterations);
-                        break;
-                    case 'lyapunov':
-                        iterations = lyapunov(c, maxIterations);
-                        break;
-                    case 'magneticPendulum':
-                        iterations = magneticPendulum(z, c, maxIterations);
-                        break;
-                    case 'fractalFlame':
-                        iterations = fractalFlame(x, y, maxIterations);
-                        break;
-                    case 'landscapeFractal':
-                        iterations = landscapeFractal(x, y, maxIterations);
-                        break;
-                    case 'organicFractal':
-                        iterations = organicFractal(x, y, maxIterations);
                         break;
                     default:
                         iterations = mandelbrot(c, maxIterations);
                         break;
                 }
                 
-                // Ensure scheme is passed to getColor
-                const color = getColor(iterations, maxIterations, scheme || 'neon');
+                const color = getColor(iterations, maxIterations, scheme);
                 const index = (py * width + px) * 4;
                 
                 data[index] = color[0];
@@ -397,7 +388,6 @@ function drawFractal(type, scheme) {
         }
         
         if (kaleidoscopeMode) {
-            // Apply kaleidoscope mirror effect
             const tempCanvas = document.createElement('canvas');
             tempCanvas.width = width;
             tempCanvas.height = height;
@@ -423,7 +413,7 @@ function drawFractal(type, scheme) {
         }
         
         loading.style.display = 'none';
-        currentFractal = { type, scheme: scheme || 'neon' };
+        currentFractal = { type, scheme };
     }, 100);
 }
 
